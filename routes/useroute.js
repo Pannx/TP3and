@@ -7,12 +7,18 @@ const isAuth = require('../middleware/isAuth');
 router.get('/users', UserController.getUsers);
 
 // GET /users/:id or /users/profil
-router.get('/:id?', isAuth, UserController.getUser);
+router.get('/users/:id', isAuth, UserController.getUser);
 
 // PUT /users/:id
 router.put('/:id', isAuth, UserController.updateUser);
 
 // DELETE /users/:id
 router.delete('/:id', isAuth, UserController.deleteUser);
+
+// POST /login
+
+router.post('/login', UserController.login);
+
+router.post('/signup', UserController.signup);
 
 module.exports = router;
