@@ -43,14 +43,15 @@ const signup = (req, res) => {
   const { firstname, lastname, email, password } = req.body;
 
   // Check if the user with the same email already exists
-  User.findOne({ email })
-    .then((existingUser) => {
-      if (existingUser) {
-        return res.status(409).json({ error: "User already exists" });
-      }
+  User.findOne({ email }).then((existingUser) => {
+    if (existingUser) {
+      return res.status(409).json({ error: "User already exists" });
+    }
 
-      // Create a new user
-      bcrypt.hash(password, 10).then((hashedPassword) => {
+    // Create a new user
+    bcrypt
+      .hash(password, 10)
+      .then((hashedPassword) => {
         const user = new User({
           firstname,
           lastname,
@@ -58,19 +59,22 @@ const signup = (req, res) => {
           password: hashedPassword,
         });
 
-        user.save()
-        .then((savedUser) => {
-          res.status(201).json({ message: "Utilisateur créé avec succès" });
-        })
-        .catch((error) => {
-          res.status(500).json({ error: "Failed to save user to the database" });
-        });
-    })
-    .catch((error) => {
-      res.status(500).json({ error: "Failed to hash the password" });
-    });
-});
-}
+        user
+          .save()
+          .then((savedUser) => {
+            res.status(201).json({ message: "Utilisateur créé avec succès" });
+          })
+          .catch((error) => {
+            res
+              .status(500)
+              .json({ error: "Failed to save user to the database" });
+          });
+      })
+      .catch((error) => {
+        res.status(500).json({ error: "Failed to hash the password" });
+      });
+  });
+};
 const createToken = (name, email) => {
   const payload = {
     name: name,
@@ -87,8 +91,6 @@ const createToken = (name, email) => {
 //const email = "johndoe@example.com";
 //const token = createToken(name, email);
 
-
-
 const getUsers = (req, res) => {
   User.find()
     .select("-email -password")
@@ -103,36 +105,22 @@ const getUsers = (req, res) => {
 const getUser = (req, res) => {
   const { id } = req.params;
   const { userId } = req.user;
-  const jeton = req.headers.authorization?.split(" ")[1];
-  console.log(jeton);
-
-  try {
-    const decodedJeton = jwt.verify(jeton, secretKey);
-
-    if (id && id !== userId) {
-      return res.status(403).json({ error: "Forbidden" });
-    }
-
-    const searchId = id || decodedJeton.userId;
-
-    User.findById(searchId)
-      .select("-email -password")
-      .then((user) => {
-        if (!user) {
-          return res.status(404).json({ error: "User not found" });
-        }
-        res.json(user);
-      })
-      .catch((error) => {
-        res.status(500).json({ error: "Internal server error" });
-      });
-  } catch (error) {
-    res.status(401).json({ error: "Unauthorized" });
-  }
+  User.findById(searchId)
+    .select("-email -password")
+    .then((user) => {
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.json(user);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Internal server error" });
+    });
 };
 
 const getProfile = (req, res) => {
-  const { userId } = req;
+  const userId = req.user.userId
+  console.log("user", req.user)
 
   User.findById(userId)
     .select("-email -password")
@@ -155,6 +143,7 @@ const updateUser = (req, res) => {
   if (!isAdmin && id !== userId) {
     return res.status(403).json({ error: "Forbidden" });
   }
+  
 
   User.findByIdAndUpdate(id, { firstname, lastname, city }, { new: true })
     .then((user) => {
