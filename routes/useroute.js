@@ -16,7 +16,7 @@ router.get('/users/:id', UserController.getUser);
 router.put('/users/:id', isAuth, UserController.updateUser);
 
 // DELETE /users/:id
-router.delete('/:id', isAuth, UserController.deleteUser);
+router.delete('/users/:id', isAuth, UserController.deleteUser);
 
 // POST /login
 

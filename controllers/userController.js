@@ -137,15 +137,14 @@ const getProfile = (req, res) => {
 
 const updateUser = (req, res) => {
   const { id } = req.params;
-  const { userId, isAdmin } = req;
-  const { firstname, lastname, city } = req.body;
+  const userId = req.user.userId;
+  const { email, firstname, lastname, city } = req.body;
 
-  if (!isAdmin && id !== userId) {
+  if (id !== userId) {
     return res.status(403).json({ error: "Forbidden" });
   }
   
-
-  User.findByIdAndUpdate(id, { firstname, lastname, city }, { new: true })
+  User.findByIdAndUpdate(id, { email, firstname, lastname, city }, { new: true })
     .then((user) => {
       if (!user) {
         return res.status(404).json({ error: "User not found" });
@@ -159,9 +158,9 @@ const updateUser = (req, res) => {
 
 const deleteUser = (req, res) => {
   const { id } = req.params;
-  const { userId, isAdmin } = req;
+  const userId = req.user.userId;
 
-  if (!isAdmin && id !== userId) {
+  if (id !== userId) {
     return res.status(403).json({ error: "Forbidden" });
   }
 
