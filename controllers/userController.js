@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const Product = require("../models/Product");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const dot = require("dotenv").config();
@@ -104,8 +105,7 @@ const getUsers = (req, res) => {
 
 const getUser = (req, res) => {
   const { id } = req.params;
-  const { userId } = req.user;
-  User.findById(searchId)
+  User.findById(id)
     .select("-email -password")
     .then((user) => {
       if (!user) {
@@ -131,6 +131,7 @@ const getProfile = (req, res) => {
       res.json(user);
     })
     .catch((error) => {
+      console.log(error)
       res.status(500).json({ error: "Internal server error" });
     });
 };
@@ -176,6 +177,113 @@ const deleteUser = (req, res) => {
     });
 };
 
+
+
+const getCart = (req, res) => {
+  const userId = req.user.userId;
+
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      // Return the user's cart
+      res.json(user.cart);
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Internal server error" });
+    });
+};
+
+const addToCart = (req, res) => {
+  const userId = req.user.userId;
+  const { productId } = req.body;
+
+  User.findById(userId)
+    .then(async (user) => {
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      try {
+        // Trouver le produit dans la base de données
+        const product = await Product.findById(productId);
+
+        // Vérifie si le produit existe et qu'il n'est pas vendu
+        if (!product || product.isSold) {
+          return res.status(404).json({ error: "Produit non disponible" });
+        }
+
+        // Ajouter le produit au panier et définir isSold sur true
+        user.cart.push(productId);
+        await user.save();
+
+        // Définir le champ isSold du produit sur true
+        product.isSold = true;
+        await product.save();
+
+        res.json({ message: "Product added to cart successfully" });
+      } catch (error) {
+        res.status(500).json({ error: "Produit non disponible" });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Internal server error" });
+    });
+};
+      
+const removeFromCart = (req, res) => {
+  const userId = req.user.userId;
+  const { id } = req.params;
+
+  User.findById(userId)
+    .then(async (user) => {
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      try {
+        // Find the product in the database
+        const product = await Product.findById(id);
+
+        // Check if the product exists and is not sold
+        if (!product || !product.isSold) {
+          return res.status(404).json({ error: "Product not available" });
+        }
+
+        // Find the index of the product in the cart
+        const productIndex = user.cart.findIndex(
+          (item) => item.productId.toString() === id
+        );
+
+        if (productIndex === -1) {
+          return res
+            .status(404)
+            .json({ error: "Product not found in the cart" });
+        }
+
+        // Remove the product from the cart
+        user.cart.splice(productIndex, 1);
+        await user.save();
+
+        // Set the product's isSold field to false
+        product.isSold = false;
+        await product.save();
+
+        res.json({ message: "Product removed from cart successfully" });
+      } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ error: "Internal server error" });
+    });
+};
+
+
+
 module.exports = {
   login,
   signup,
@@ -185,4 +293,7 @@ module.exports = {
   updateUser,
   deleteUser,
   createToken,
+  getCart,
+  addToCart,
+  removeFromCart,
 };

@@ -5,13 +5,13 @@ const authMiddleware = require('../middleware/isAuth');
 const isAuth = require('../middleware/isAuth');
 
 // GET /products
-router.get('/', ProductController.getProducts);
+router.get('/products', ProductController.getProducts);
 
 // GET /products/:id
-router.get('/:id', ProductController.getProductById);
+router.get('/products/:id', ProductController.getProductById);
 
 // POST /products
-router.post('/', isAuth, ProductController.createProduct);
+router.post('/products', isAuth, ProductController.createProduct);
 
 // DELETE /products/:id
 router.delete('/:id', isAuth, ProductController.deleteProduct);

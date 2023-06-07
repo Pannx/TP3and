@@ -24,4 +24,8 @@ router.post('/login', UserController.login);
 
 router.post('/signup', UserController.signup);
 
+router.get('/cart', isAuth, UserController.getCart);
+router.put('/cart', isAuth, UserController.addToCart);
+router.delete('/cart/:id', isAuth, UserController.removeFromCart);
+
 module.exports = router;

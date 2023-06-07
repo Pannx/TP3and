@@ -29,7 +29,8 @@ const getProductById = (req, res) => {
 
 // POST /products
 const createProduct = (req, res) => {
-  const { title, description, price, imageUrl, categoryId, userId } = req.body;
+  const { title, description, price, imageUrl, categoryId } = req.body;
+  const userId = req.user.userId;
 
   const product = new Product({
     title,
@@ -37,7 +38,7 @@ const createProduct = (req, res) => {
     price,
     imageUrl,
     categoryId,
-    userId,
+    userId
   });
 
   product
@@ -46,6 +47,7 @@ const createProduct = (req, res) => {
       res.json(savedProduct);
     })
     .catch(error => {
+      console.error(error); // Log the error to the console for debugging purposes
       res.status(500).json({ error: 'Internal server error' });
     });
 };
