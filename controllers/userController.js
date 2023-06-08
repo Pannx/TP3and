@@ -4,6 +4,50 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const dot = require("dotenv").config();
 
+// Example method to create an admin user
+const createAdminUser = async () => {
+  try {
+    // Check if an admin user already exists
+    const adminUser = await User.findOne({ isAdmin: true });
+
+    if (adminUser) {
+      console.log('Admin user already exists.');
+      return;
+    }
+
+    // Create a new admin user
+    const newAdminUser = new User({
+      username: 'admin',
+      password: 'adminpassword',
+      isAdmin: true
+    });
+
+    await newAdminUser.save();
+    console.log('Admin user created successfully.');
+  } catch (error) {
+    console.error('Failed to create admin user:', error);
+  }
+};
+
+
+
+// Admin login endpoint
+const adminLogin = (req, res) => {
+  const { username, password } = req.body;
+
+  // Check if username and password match the admin user in the database
+  if (username === 'admin' && password === 'adminpassword') {
+    // Generate an authentication token
+    const token = jwt.sign({ username, isAdmin: true }, 'your-secret-key');
+
+    // Send the token as a response
+    res.json({ token });
+  } else {
+    res.status(401).json({ error: 'Invalid credentials' });
+  }
+};
+
+
 const login = (req, res) => {
   const { email, password } = req.body;
 
@@ -119,8 +163,8 @@ const getUser = (req, res) => {
 };
 
 const getProfile = (req, res) => {
-  const userId = req.user.userId
-  console.log("user", req.user)
+  const userId = req.user.userId;
+  console.log("user", req.user);
 
   User.findById(userId)
     .select("-email -password")
@@ -131,7 +175,7 @@ const getProfile = (req, res) => {
       res.json(user);
     })
     .catch((error) => {
-      console.log(error)
+      console.log(error);
       res.status(500).json({ error: "Internal server error" });
     });
 };
@@ -144,8 +188,12 @@ const updateUser = (req, res) => {
   if (id !== userId) {
     return res.status(403).json({ error: "Forbidden" });
   }
-  
-  User.findByIdAndUpdate(id, { email, firstname, lastname, city }, { new: true })
+
+  User.findByIdAndUpdate(
+    id,
+    { email, firstname, lastname, city },
+    { new: true }
+  )
     .then((user) => {
       if (!user) {
         return res.status(404).json({ error: "User not found" });
@@ -176,8 +224,6 @@ const deleteUser = (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     });
 };
-
-
 
 const getCart = (req, res) => {
   const userId = req.user.userId;
@@ -232,10 +278,10 @@ const addToCart = (req, res) => {
       res.status(500).json({ error: "Internal server error" });
     });
 };
-      
+
 const removeFromCart = (req, res) => {
   const userId = req.user.userId;
-  const { id } = req.params;
+  const { productId } = req.params;
 
   User.findById(userId)
     .then(async (user) => {
@@ -244,32 +290,9 @@ const removeFromCart = (req, res) => {
       }
 
       try {
-        // Find the product in the database
-        const product = await Product.findById(id);
-
-        // Check if the product exists and is not sold
-        if (!product || !product.isSold) {
-          return res.status(404).json({ error: "Product not available" });
-        }
-
-        // Find the index of the product in the cart
-        const productIndex = user.cart.findIndex(
-          (item) => item.productId.toString() === id
-        );
-
-        if (productIndex === -1) {
-          return res
-            .status(404)
-            .json({ error: "Product not found in the cart" });
-        }
-
-        // Remove the product from the cart
-        user.cart.splice(productIndex, 1);
+        const indice = user.cart.indexOf(productId)
+        user.cart.splice(indice, 1);
         await user.save();
-
-        // Set the product's isSold field to false
-        product.isSold = false;
-        await product.save();
 
         res.json({ message: "Product removed from cart successfully" });
       } catch (error) {
@@ -282,9 +305,8 @@ const removeFromCart = (req, res) => {
     });
 };
 
-
-
 module.exports = {
+  createAdminUser,
   login,
   signup,
   getUsers,
