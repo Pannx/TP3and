@@ -4,10 +4,10 @@ const CategoryController = require('../controllers/categoryController');
 const isAuth = require('../middleware/isAuth');
 
 // GET /categories
-router.get('/', CategoryController.getCategories);
+router.get('/categories', CategoryController.getCategories);
 
 // GET /categories/:id
-router.get('/:id', CategoryController.getCategoryById);
+router.get('/categories/:id', CategoryController.getCategoryById);
 
 // POST /categories
 router.post('/', isAuth, CategoryController.createCategory);
