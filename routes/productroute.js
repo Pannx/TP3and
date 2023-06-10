@@ -3,7 +3,7 @@ const router = express.Router();
 const ProductController = require('../controllers/productController');
 const authMiddleware = require('../middleware/isAuth');
 const isAuth = require('../middleware/isAuth');
-
+const searchController = require('../controllers/searchController');
 // GET /products
 router.get('/products', ProductController.getProducts);
 
@@ -17,6 +17,9 @@ router.post('/products', isAuth, ProductController.createProduct);
 router.delete('/:id', isAuth, ProductController.deleteProduct);
 
 // GET /products/user/:userId
-router.get('/user/:userId', ProductController.getProductsByUser);
+router.get('/products/user/:userId', ProductController.getProductsByUser);
+
+router.get('/search', searchController.searchProducts);
+
 
 module.exports = router;

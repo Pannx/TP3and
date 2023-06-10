@@ -8,11 +8,14 @@ const searchProducts = (req, res) => {
     return res.status(400).json({ error: 'Query parameter is required' });
   }
 
-  Product.find({ title: { $regex: q, $options: 'i' } })
+  const query = q.replace(/%20/g, ' ');
+
+  Product.find({ title: { $regex: `.*${query}.*`, $options: 'i' } })
     .then(products => {
       res.json(products);
     })
     .catch(error => {
+      console.log(error);
       res.status(500).json({ error: 'Internal server error' });
     });
 };

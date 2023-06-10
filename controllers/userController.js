@@ -4,47 +4,39 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const dot = require("dotenv").config();
 
-// Example method to create an admin user
-const createAdminUser = async () => {
-  try {
-    // Check if an admin user already exists
-    const adminUser = await User.findOne({ isAdmin: true });
-
-    if (adminUser) {
-      console.log('Admin user already exists.');
-      return;
-    }
-
-    // Create a new admin user
-    const newAdminUser = new User({
-      username: 'admin',
-      password: 'adminpassword',
-      isAdmin: true
-    });
-
-    await newAdminUser.save();
-    console.log('Admin user created successfully.');
-  } catch (error) {
-    console.error('Failed to create admin user:', error);
-  }
-};
-
-
 
 // Admin login endpoint
 const adminLogin = (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  // Check if username and password match the admin user in the database
-  if (username === 'admin' && password === 'adminpassword') {
-    // Generate an authentication token
-    const token = jwt.sign({ username, isAdmin: true }, 'your-secret-key');
+  // Find the admin user in the database based on the email and isAdmin field
+  User.findOne({ email, isAdmin: true })
+    .then((adminUser) => {
+      if (!adminUser) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+      }
 
-    // Send the token as a response
-    res.json({ token });
-  } else {
-    res.status(401).json({ error: 'Invalid credentials' });
-  }
+      // Compare the provided password with the hashed password stored in the database
+      bcrypt
+        .compare(password, adminUser.password)
+        .then((isMatch) => {
+          if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+          }
+
+          // Generate an authentication token
+          const token = jwt.sign({ userId: adminUser._id, isAdmin: true }, process.env.SECRET_KEY);
+
+          // Send the token as a response
+          res.json({ token });
+        })
+        .catch((error) => {
+          res.status(500).json({ error: 'Internal server error' });
+        });
+    })
+    .catch((error) => {
+      res.status(500).json({ error: 'Internal server error' });
+    });
 };
 
 
@@ -306,7 +298,7 @@ const removeFromCart = (req, res) => {
 };
 
 module.exports = {
-  createAdminUser,
+  adminLogin,
   login,
   signup,
   getUsers,
