@@ -36,7 +36,7 @@ const createCategory = (req, res) => {
   category
     .save()
     .then(savedCategory => {
-      res.json(savedCategory);
+      res.status(201).json(savedCategory);
     })
     .catch(error => {
       console.log(error)
@@ -70,7 +70,7 @@ const deleteCategory = (req, res) => {
       if (!deletedCategory) {
         return res.status(404).json({ error: 'Category not found' });
       }
-      res.json({ message: 'Category deleted successfully' });
+      res.status(204).send()
     })
     .catch(error => {
       res.status(500).json({ error: 'Internal server error' });

@@ -14,7 +14,7 @@ router.get('/products/:id', ProductController.getProductById);
 router.post('/products', isAuth, ProductController.createProduct);
 
 // DELETE /products/:id
-router.delete('/:id', isAuth, ProductController.deleteProduct);
+router.delete('/products/:id', isAuth, ProductController.deleteProduct);
 
 // GET /products/user/:userId
 router.get('/products/user/:userId', ProductController.getProductsByUser);

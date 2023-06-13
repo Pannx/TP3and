@@ -77,7 +77,7 @@ const login = (req, res) => {
 };
 
 const signup = (req, res) => {
-  const { firstname, lastname, email, password } = req.body;
+  const { firstname, lastname, email, password, city } = req.body;
 
   // Check if the user with the same email already exists
   User.findOne({ email }).then((existingUser) => {
@@ -94,6 +94,7 @@ const signup = (req, res) => {
           lastname,
           email,
           password: hashedPassword,
+          city,
         });
 
         user
@@ -210,7 +211,7 @@ const deleteUser = (req, res) => {
       if (!user) {
         return res.status(404).json({ error: "User not found" });
       }
-      res.json({ message: "User deleted successfully" });
+      res.status(204);
     })
     .catch((error) => {
       res.status(500).json({ error: "Internal server error" });

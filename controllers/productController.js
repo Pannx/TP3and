@@ -1,13 +1,13 @@
-const Product = require('../models/product');
+const Product = require("../models/product");
 
 // GET /products
 const getProducts = (req, res) => {
   Product.find()
-    .then(products => {
+    .then((products) => {
       res.json(products);
     })
-    .catch(error => {
-      res.status(500).json({ error: 'Internal server error' });
+    .catch((error) => {
+      res.status(500).json({ error: "Internal server error" });
     });
 };
 
@@ -16,14 +16,14 @@ const getProductById = (req, res) => {
   const { id } = req.params;
 
   Product.findById(id)
-    .then(product => {
+    .then((product) => {
       if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
+        return res.status(404).json({ error: "Product not found" });
       }
       res.json(product);
     })
-    .catch(error => {
-      res.status(500).json({ error: 'Internal server error' });
+    .catch((error) => {
+      res.status(500).json({ error: "Internal server error" });
     });
 };
 
@@ -38,45 +38,46 @@ const createProduct = (req, res) => {
     price,
     imageUrl,
     categoryId,
-    userId
+    userId,
   });
 
   product
     .save()
-    .then(savedProduct => {
-      res.json(savedProduct);
+    .then((savedProduct) => {
+      res.status(201).json(savedProduct);
     })
-    .catch(error => {
-      console.error(error); // Log the error to the console for debugging purposes
-      res.status(500).json({ error: 'Internal server error' });
+    .catch((error) => {
+      res.status(500).json({ error: "Internal server error" });
     });
 };
 
 // DELETE /products/:id
 const deleteProduct = (req, res) => {
-  const { id } = req.params;
-  const { userId, isAdmin } = req;
+  const {id} = req.params;
+  const userId = req.user.userId;
 
   Product.findById(id)
-    .then(product => {
+    .then((product) => {
       if (!product) {
-        return res.status(404).json({ error: 'Product not found' });
+        return res.status(404).json({ error: "Product not found" });
       }
-
-      if (!isAdmin && product.userId !== userId) {
-        return res.status(403).json({ error: 'Forbidden' });
+      console.log(product.userId.toString());
+      console.log(userId);
+      if (product.userId.toString() !== userId) {
+        return res.status(403).json({ error: "Forbidden" });
       }
 
       return Product.findByIdAndDelete(id);
     })
-    .then(deletedProduct => {
+    .then((deletedProduct) => {
       if (!deletedProduct) {
-        return res.status(404).json({ error: 'Product not found' });
+        return res.status(404).json({ error: "Product not found" });
       }
-      res.json({ message: 'Product deleted successfully' });
+      res.status(204);
     })
-    .catch(error => {
-      res.status(500).json({ error: 'Internal server error' });
+    .catch((error) => {
+      console.log(error);
+      res.status(500).json({ error: "Internal server error" });
     });
 };
 
@@ -85,11 +86,11 @@ const getProductsByUser = (req, res) => {
   const { userId } = req.params;
 
   Product.find({ userId })
-    .then(products => {
+    .then((products) => {
       res.json(products);
     })
-    .catch(error => {
-      res.status(500).json({ error: 'Internal server error' });
+    .catch((error) => {
+      res.status(500).json({ error: "Internal server error" });
     });
 };
 

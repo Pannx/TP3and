@@ -49,7 +49,7 @@ app.use(errorController.errorHandler);
 const PORT = process.env.PORT || 3002;
 // Connect to MongoDB and start the server
 mongoose
-  .connect("mongodb://127.0.0.1:27017/testdw3")
+  .connect(process.env.MONGODBATLAS)
   .then(() => {
     console.log("Connected to the database");
     app.listen(3002, () => {
