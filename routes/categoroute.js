@@ -3,6 +3,8 @@ const router = express.Router();
 const CategoryController = require('../controllers/categoryController');
 const isAuth = require('../middleware/isAuth');
 
+//Routes qui correspondent aux endpoints de la collection Categories dans Postman
+
 // GET /categories
 router.get('/categories', CategoryController.getCategories);
 

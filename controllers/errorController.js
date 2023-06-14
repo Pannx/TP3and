@@ -1,5 +1,9 @@
 "use strict"
-// Error handler middleware
+
+/**Middleware de gestion des erreurs pour une application Node.js qui
+ * recherche des types d'erreurs spécifiques et renvoie un message d'erreur et un code d'état
+ * appropriés. 
+ */
 const errorHandler = (err, req, res, next) => {
   console.error(err);
 

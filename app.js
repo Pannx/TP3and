@@ -17,15 +17,13 @@ app.use((req, res, next) => {
   next();
 });
 
-
-
-// Import the routes
+// Importer les routes
 const userRoutes = require("./routes/useroute");
 const productRoutes = require("./routes/productroute");
 const categoRoutes = require("./routes/categoroute");
 
 
-// Import the error controller
+// Importer le controleur des erreurs
 const errorController = require("./controllers/errorController");
 
 // Middleware for parsing JSON requests
@@ -33,7 +31,6 @@ app.use(express.json());
 
 // Middleware for parsing urlencoded requests
 app.use(express.urlencoded({ extended: false }));
-
 
 
 // Routes
@@ -47,6 +44,7 @@ app.use(categoRoutes);
 app.use(errorController.errorHandler);
 
 const PORT = process.env.PORT || 3002;
+
 // Connect to MongoDB and start the server
 mongoose
   .connect(process.env.MONGODBATLAS)
