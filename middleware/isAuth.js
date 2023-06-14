@@ -23,8 +23,7 @@ module.exports = (req, res, next) => {
   try {
     decodedToken = jwt.verify(token, process.env.SECRET_KEY);
   } catch (err) {
-    err.statusCode = 401;
-    throw err;
+    res.status(403).json({ error: "Non autorisé" });
   }
   if (!decodedToken) {
     const error = new Error('Non authentifié.');

@@ -2,7 +2,7 @@ const Category = require("../models/category");
 
 /**GET /categories
  * Fonction qui récupère toutes les catégories de la base de données et les envoie sous forme de
- * réponse JSON, ou renvoie un message d'erreur en cas d'erreur de serveur. 
+ * réponse JSON, ou renvoie un message d'erreur en cas d'erreur de serveur.
  * La fonction utilise le modèle `Category` pour trouver tous les utilisateurs dans la base de données et les renvoie sous forme de réponse JSON.
  */
 const getCategories = (req, res) => {
@@ -37,9 +37,19 @@ const getCategoryById = (req, res) => {
 
 /**POST /categories
  * Fonction qui crée une nouvelle catégorie dans la BD en enregistrant le nom fourni dans le body de la req
- * et renvoie la catégorie enregistrée sous forme de réponse JSON ou renvoie un message d'erreur en cas d'erreur avec le serveur.
+ * Renvoie un message d'erreur si l'utilisateur n'est pas l'admin.
  */
 const createCategory = (req, res) => {
+  // Check if the user is the admin
+  const isAdmin = req.user.isAdmin; // Assuming the user object has an 'isAdmin' property
+
+  if (!isAdmin) {
+    // If the user is not the admin, send an error message
+    return res
+      .status(403)
+      .json({ error: "Vous n'êtes pas autorisé(e) à créer une catégorie." });
+  }
+
   const { name } = req.body;
 
   const category = new Category({ name });

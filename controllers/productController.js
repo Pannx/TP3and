@@ -2,7 +2,7 @@ const Product = require("../models/product");
 
 /**GET /products
  * Fonction qui récupère tous les produits de la base de données et les envoie sous forme de
- * réponse JSON, ou renvoie un message d'erreur en cas d'erreur de serveur. 
+ * réponse JSON, ou renvoie un message d'erreur en cas d'erreur de serveur.
  * La fonction utilise le modèle `Product` pour trouver tous les utilisateurs dans la base de données et les renvoie sous forme de réponse JSON.
  */
 const getProducts = (req, res) => {
@@ -35,11 +35,22 @@ const getProductById = (req, res) => {
 };
 
 /**POST /products
- * Fonction qui crée un nouveau produit et l'enregistre dans la base de données.
+ * Fonction qui crée un nouveau produit et l'enregistre dans la base de données. L'utilisateur doit être connecté.
+ * Si tous les champs de la req ne sont pas remplis, renvoie un message d'erreur.
  */
 const createProduct = (req, res) => {
   const { title, description, price, imageUrl, categoryId } = req.body;
   const userId = req.user.userId;
+
+  if (!req.user) {
+    return res.status(401).json({ error: "Vous devez être connecté(e)." });
+  }
+
+  if (!title || !description || !price || !imageUrl || !categoryId) {
+    return res
+      .status(422)
+      .json({ error: "Tous les champs doivent être remplis." });
+  }
 
   const product = new Product({
     title,
@@ -65,7 +76,7 @@ const createProduct = (req, res) => {
  * le propriétaire du produit. S'il ne l'est pas, la suppression est interdite.
  */
 const deleteProduct = (req, res) => {
-  const {id} = req.params;
+  const { id } = req.params;
   const userId = req.user.userId;
 
   Product.findById(id)

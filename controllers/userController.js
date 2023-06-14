@@ -45,9 +45,8 @@ const adminLogin = (req, res) => {
 };
 
 /* POST /login 
-Fonction utilisée pour
-gérer la logique de connexion de l'utilisateur. Il extrait l'e-mail et le mot de passe du corps de
-la demande, trouve l'utilisateur avec l'e-mail correspondant dans la base de données et compare le
+Fonction utilisée pour la connexion de l'utilisateur en fonction de l'e-mail et du mot de passe de la requête.
+Elle trouve l'utilisateur avec l'e-mail correspondant dans la base de données et compare le
 mot de passe fourni avec le mot de passe haché stocké dans la base de données. Si les mots de passe
 correspondent, il crée et signe un jeton JWT et le renvoie en réponse. Si les mots de passe ne
 correspondent pas, il envoie une réponse d'erreur. */
@@ -86,7 +85,6 @@ const login = (req, res) => {
       res.status(500).json({ error: "Erreur interne du serveur" });
     });
 };
-
 
 /* POST/ signup
 Fonction qui permet de gérer la logique de création d'un nouveau compte utilisateur. Il extrait les informations
@@ -141,7 +139,6 @@ const createToken = (name, email) => {
   return token;
 };
 
-
 /* GET/ users 
 Fonction qui récupère et renvoie tous les utilisateurs de la BD quand une requête GET est lancée. 
 La fonction utilise le modèle `User` pour trouver tous les utilisateurs dans la base de données et les renvoie sous forme de réponse JSON. */
@@ -170,15 +167,18 @@ const getUser = (req, res) => {
       res.json(user);
     })
     .catch((error) => {
+      if (error.name === "CastError" && error.kind === "ObjectId") {
+        return res.status(404).json({ error: "Utilisateur non trouvé" });
+      }
       res.status(500).json({ error: "Erreur interne du serveur" });
     });
 };
 
 /*GET /users/profil 
-Fonction qui gère une requête GET pour récupérer les informations de
-profil d'un utilisateur. Il extrait l'ID utilisateur du jeton JWT dans l'en-tête de la demande,
+Fonction qui récupère les informations de
+profil d'un utilisateur connecté. Elle extrait l'ID utilisateur du jeton JWT dans l'en-tête de la demande,
 trouve l'utilisateur dans la base de données à l'aide de l'ID et renvoie les informations de profil
-de l'utilisateur (à l'exclusion de l'adresse e-mail et du mot de passe) sous forme de réponse JSON. */
+de l'utilisateur. */
 const getProfile = (req, res) => {
   const userId = req.user.userId;
   console.log("user", req.user);
@@ -193,10 +193,9 @@ const getProfile = (req, res) => {
     })
     .catch((error) => {
       console.log(error);
-      res.status(500).json({ error: "Erreur interne du serveur" });
+      res.status(403).json({ error: "Non autorisé" });
     });
 };
-
 
 /* PUT /users/:id
 Fonction qui gère la logique de mise à jour des informations d'un
@@ -226,7 +225,6 @@ const updateUser = (req, res) => {
       res.status(500).json({ error: "Erreur interne du serveur" });
     });
 };
-
 
 /* DELETE /users/:id
 Fonction qui supprime l'utilisateur de la BD. Elle extrait l'id utilisateur des paramètres de la demande et vérifie que l'utilisateur
@@ -274,7 +272,6 @@ const getCart = (req, res) => {
     });
 };
 
-
 /*PUT /cart 
 Fonction qui ajoute un produit au panier d'un
 utilisateur. Il prend les objets de demande et de réponse en tant que paramètres, extrait l'ID
@@ -317,7 +314,6 @@ const addToCart = (req, res) => {
       res.status(500).json({ error: "Erreur interne du serveur" });
     });
 };
-
 
 /* DELETE /cart/:id'
 Fonction qui gère une requête DELETE pour supprimer un produit du
